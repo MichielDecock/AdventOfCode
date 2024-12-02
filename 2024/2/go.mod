@@ -1,4 +1,4 @@
-module aoc.com/1
+module aoc.com/2
 
 go 1.23.3
 
