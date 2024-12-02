@@ -22,7 +22,7 @@ func toNumber(value string) int {
 func readFile(fileName string) []string {
 	var lines []string
 
-	file, err := os.Open("fileName")
+	file, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
