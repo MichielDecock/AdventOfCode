@@ -15,8 +15,8 @@ func Print(input map[int]string) {
 }
 
 func Find(input string) int {
-	regex1 := regexp.MustCompile(`XMAS`)
-	regex2 := regexp.MustCompile(`SAMX`)
+	regex1 := regexp.MustCompile(`MAS`)
+	regex2 := regexp.MustCompile(`SAM`)
 	return len(regex1.FindAllString(input, -1)) + len(regex2.FindAllString(input, -1));
 }
 
@@ -45,15 +45,21 @@ func Flip(input map[int]string) map[int]string {
 func FindDiagonal(input map[int]string) int {
 	total := 0
 
-	for row := 0; row != len(input) - 3; row++ {
-		part := make(map[int]string)
-		
-		for partRow := 0; partRow != 4; partRow++ {
-			part[partRow] = input[row + partRow]
-		}
+	for row := 0; row != len(input) - 2; row++ {
+		for col := 0; col != len(input[row]) - 2; col++ {
+			part := make(map[int]string)
+			
+			for partRow := 0; partRow != 3; partRow++ {
+				part[partRow] = string(input[row + partRow][col]) + string(input[row + partRow][col + 1]) + string(input[row + partRow][col + 2])
+			}
 
-		total += FindInMap(Flip(ShiftLeft(part)))
-		total += FindInMap(Flip(ShiftLeft(inverse(part))))
+			forward := FindInMap(Flip(ShiftLeft(part)))
+			backward := FindInMap(Flip(ShiftLeft(inverse(part))))
+
+			if forward == 1 && backward == 1 {
+				total++
+			}
+		}
 	}
 
 	return total
@@ -89,8 +95,7 @@ func main() {
 		input[index] = line
 	}
 
-	total := FindInMap(Flip(input)) + FindInMap(input) + FindDiagonal(input)
-
+	total := FindDiagonal(input)
 
 	fmt.Println(strconv.FormatFloat(float64(total), 'f', -1, 64))
 }
