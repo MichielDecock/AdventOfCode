@@ -19,10 +19,6 @@ func findPath(number int, pos Pos, plan [][]int, found *[][]bool) int {
 	}
 
 	if plan[pos.Row][pos.Col] == 9 {
-		if (*found)[pos.Row][pos.Col] {
-			return 0
-		}
-		(*found)[pos.Row][pos.Col] = true
 		return 1
 	}
 
