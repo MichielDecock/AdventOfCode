@@ -24,7 +24,7 @@ func TestInit(t *testing.T) {
 
 func TestMove(t *testing.T) {
 	input := []int{0, 0, -1, -1, -1, 1, 1, 1}
-	assert.Equal(t, []int{0, 0, 1, 1, 1}, Move(input))
+	assert.Equal(t, []int{0, 0, 1, 1, 1, -1, -1, -1}, Move(input))
 }
 
 func TestFirstSpace(t *testing.T) {
@@ -38,6 +38,6 @@ func TestLastFile(t *testing.T) {
 }
 
 func TestCheckSum(t *testing.T) {
-	input := []int{0, 0, 1, 1, 1}
-	assert.Equal(t, 9, CheckSum(input))
+	input := []int{0, 0, 1, 1, 1, -1, -1, -1}
+	assert.Equal(t, uint64(9), CheckSum(input))
 }

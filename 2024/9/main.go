@@ -6,6 +6,15 @@ import (
 	"aoc.com/utils"
 )
 
+type Range struct {
+	Start int
+	End   int
+}
+
+func invalidRange() Range {
+	return Range{-1, -1}
+}
+
 func Convert(input string) []int {
 	out := Init(input)
 
@@ -74,7 +83,7 @@ func Move(input []int) []int {
 		}
 
 		index := input[file]
-		input = input[:file]
+		input[file] = -1
 		input[space] = index
 	}
 	return input
@@ -91,9 +100,76 @@ func CheckSum(input []int) uint64 {
 	return uint64(sum)
 }
 
+func findBlock(input []int) Range {
+	index := -1
+	block := invalidRange()
+	for i := len(input) - 1; i >= 0; i-- {
+		el := input[i]
+		if el != -1 {
+			if block.End == -1 {
+				block.End = i + 1
+				index = el
+				continue
+			} else if index != el {
+				block.Start = i + 1
+				return block
+			}
+		} else if block.End != -1 {
+			block.Start = i + 1
+			return block
+		}
+	}
+	return invalidRange()
+}
+
+func findSpace(input []int, block Range) int {
+	span := block.End - block.Start
+	space := -1
+	for i, el := range input {
+		if i >= block.End {
+			return -1
+		}
+
+		if el == -1 {
+			if space == -1 {
+				space = i
+			}
+		} else if space != -1 {
+			if span <= i-space {
+				return space
+			}
+			space = -1
+		}
+	}
+	return -1
+}
+
+func moveBlocks(input []int) []int {
+	end := len(input)
+	for {
+		local := input[:end]
+		block := findBlock(local)
+		if block == invalidRange() {
+			break
+		}
+
+		space := findSpace(local, block)
+		if space != -1 {
+			span := block.End - block.Start
+
+			for i := 0; i != span; i++ {
+				input[space+i] = input[block.Start+i]
+				input[block.Start+i] = -1
+			}
+		}
+
+		end = block.Start
+	}
+	return input
+}
+
 func main() {
-	total := CheckSum(Move(Convert(utils.ReadFile("input")[0])))
+	total := CheckSum(moveBlocks(Convert(utils.ReadFile("input")[0])))
 
 	fmt.Println(uint64(total))
-
 }
