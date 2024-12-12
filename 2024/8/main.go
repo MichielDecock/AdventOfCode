@@ -49,8 +49,19 @@ func contains(positions []Pos, position Pos) bool {
 	return false
 }
 
+func add(node Pos, end Pos, antiNodes *[]Pos) bool {
+	if node.Row >= end.Row || node.Row < 0 || node.Col >= end.Col || node.Col < 0 {
+		return false
+	}
+
+	if !contains(*antiNodes, node) {
+		*antiNodes = append(*antiNodes, node)
+	}
+
+	return true
+}
+
 func antiNodes(nodeType string, lines []string, antiNodes *[]Pos) {
-	start := 0
 	end := Pos{len(lines), len(lines[0])}
 
 	nodes := nodes(nodeType, lines)
@@ -62,12 +73,17 @@ func antiNodes(nodeType string, lines []string, antiNodes *[]Pos) {
 
 			span := Pos{nodes[i].Row - nodes[j].Row, nodes[i].Col - nodes[j].Col}
 
-			n := []Pos{{nodes[i].Row + span.Row, nodes[i].Col + span.Col}, {nodes[j].Row - span.Row, nodes[j].Col - span.Col}}
-			for _, node := range n {
-				if node.Row < end.Row && node.Row >= start && node.Col < end.Col && node.Col >= start {
-					if !contains(*antiNodes, node) {
-						*antiNodes = append(*antiNodes, node)
-					}
+			for n := 0; ; n++ {
+				node := Pos{nodes[i].Row + n*span.Row, nodes[i].Col + n*span.Col}
+				if !add(node, end, antiNodes) {
+					break
+				}
+			}
+
+			for n := 0; ; n++ {
+				node := Pos{nodes[j].Row - n*span.Row, nodes[j].Col - n*span.Col}
+				if !add(node, end, antiNodes) {
+					break
 				}
 			}
 		}
