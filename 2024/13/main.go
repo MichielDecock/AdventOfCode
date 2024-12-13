@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"regexp"
 	"strconv"
 
@@ -36,37 +35,32 @@ func parse(input []string) Claws {
 
 func tokens(claw []Pair) int {
 	goal := claw[2]
+	goal.X += 10000000000000
+	goal.Y += 10000000000000
+
 	a := claw[0]
 	b := claw[1]
 
-	A := -1
-	B := -1
-	T := math.MaxInt
+	n1 := goal.X*a.Y - goal.Y*a.X
+	n2 := b.X*a.Y - b.Y*a.X
 
-	for u := 0; u != 101; u++ {
-		for v := 0; v != 101; v++ {
-			if u*a.X+v*b.X != goal.X {
-				continue
-			}
-
-			if u*a.Y+v*b.Y != goal.Y {
-				continue
-			}
-
-			cost := 3*u + v
-			if cost < T {
-				T = cost
-				A = u
-				B = v
-			}
-		}
+	if n2 == 0 {
+		fmt.Println("Division by zero!")
+		return 0
 	}
 
-	if A != -1 && B != -1 {
-		return T
+	if n1%n2 != 0 {
+		return 0
 	}
 
-	return 0
+	v := n1 / n2
+	if (goal.X-v*b.X)%a.X != 0 {
+		return 0
+	}
+
+	u := (goal.X - v*b.X) / a.X
+
+	return 3*u + v
 }
 
 func total(claws Claws) int {
