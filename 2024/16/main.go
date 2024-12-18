@@ -43,6 +43,14 @@ func initVisited(rows int, cols int) Visited {
 	return visited
 }
 
+func initBoolMatrix(rows int, cols int) [][]bool {
+	visited := make([][]bool, rows)
+	for row := range rows {
+		visited[row] = make([]bool, cols)
+	}
+	return visited
+}
+
 func parse(fileName string) Maze {
 	lines := utils.ReadFile(fileName)
 
@@ -158,24 +166,78 @@ func pop_back(reindeers *[]Reindeer) Reindeer {
 	return back
 }
 
-func shortestPath(target Pos, current Pos) int {
-	return 1000 + (target.Col - current.Col) + (target.Row - current.Row)
-}
-
 func currentPosition(reindeer Reindeer) Pos {
 	return reindeer.path[len(reindeer.path)-1]
 }
 
-func walk(maze Maze) int {
+func printMaze(maze Maze) {
+	for _, i := range maze {
+		for _, j := range i {
+			fmt.Print(j)
+		}
+		fmt.Println()
+	}
+}
+
+func routes(minimalPaths []Reindeer, rows int, cols int, distance int) [][]bool {
+	routes := initBoolMatrix(rows, cols)
+
+	for _, path := range minimalPaths {
+		if path.distance != distance {
+			continue
+		}
+
+		for _, cell := range path.path {
+			routes[cell.Row][cell.Col] = true
+		}
+	}
+
+	return routes
+}
+
+func seats(routes [][]bool) int {
+	total := 0
+	for _, i := range routes {
+		for _, j := range i {
+			if j {
+				total++
+			}
+		}
+	}
+
+	return total
+}
+
+func toMaze(routes [][]bool, original Maze) Maze {
+	maze := make([][]string, len(original))
+	for r := range maze {
+		maze[r] = make([]string, len(original[0]))
+		for c := range len(original[0]) {
+			maze[r][c] = original[r][c]
+		}
+	}
+
+	for r, i := range routes {
+		for c, j := range i {
+			if j {
+				maze[r][c] = "o"
+			}
+		}
+	}
+
+	return maze
+}
+
+func walk(maze Maze, minDistance int) int {
 	var reindeers []Reindeer
 
 	reindeers = append(reindeers, findReindeer(maze))
 
-	target := findTarget(maze)
-
-	minDistance := math.MaxInt
+	update := (minDistance == math.MaxInt)
 
 	visited := initVisited(len(maze), len(maze[0]))
+
+	var minimalPaths []Reindeer
 
 	for {
 		if len(reindeers) == 0 {
@@ -186,25 +248,44 @@ func walk(maze Maze) int {
 
 		pos := currentPosition(reindeer)
 
-		if reindeer.distance >= visited[pos.Row][pos.Col] {
-			continue
+		if visited[pos.Row][pos.Col] != math.MaxInt {
+			if update {
+				if reindeer.distance > (visited[pos.Row][pos.Col]) {
+					continue
+				}
+			} else if (reindeer.distance != (visited[pos.Row][pos.Col])+1000) && (reindeer.distance != (visited[pos.Row][pos.Col])+2000) {
+				if reindeer.distance > (visited[pos.Row][pos.Col]) {
+					continue
+				}
+			}
 		}
 
 		visited[pos.Row][pos.Col] = reindeer.distance
 
-		if reindeer.distance >= minDistance-shortestPath(currentPosition(target), pos) {
+		if reindeer.distance > minDistance {
 			continue
 		}
 
 		if maze[pos.Row][pos.Col] == "E" {
-			minDistance = int(math.Min(float64(minDistance), float64(reindeer.distance)))
+			if update {
+				minDistance = int(math.Min(float64(minDistance), float64(reindeer.distance)))
+			}
+			minimalPaths = append(minimalPaths, reindeer)
 			continue
 		}
 
 		reindeers = append(reindeers, neighbors(reindeer, maze)...)
 	}
 
-	return minDistance
+	shortest := routes(minimalPaths, len(maze), len(maze[0]), minDistance)
+
+	printMaze(toMaze(shortest, maze))
+
+	if update {
+		return minDistance
+	}
+
+	return seats(shortest)
 }
 
 func findReindeer(maze Maze) Reindeer {
@@ -220,23 +301,12 @@ func findReindeer(maze Maze) Reindeer {
 	return Reindeer{[]Pos{}, 0, East}
 }
 
-func findTarget(maze Maze) Reindeer {
-	for row, line := range maze {
-		for col, el := range line {
-			if el == "E" {
-				return Reindeer{[]Pos{{row, col}}, 0, East}
-			}
-		}
-	}
-
-	fmt.Println("The target wasn't found!")
-	return Reindeer{[]Pos{}, 0, East}
-}
-
 func main() {
 	maze := parse("input")
 
-	total := walk(maze)
+	total := walk(maze, math.MaxInt)
+	fmt.Println("first run")
+	total = walk(maze, total)
 
 	fmt.Println(strconv.FormatFloat(float64(total), 'f', -1, 64))
 }
