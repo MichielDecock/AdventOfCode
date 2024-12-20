@@ -57,7 +57,7 @@ func initDistanceMaze(m Maze) DistanceMaze {
 	return maze
 }
 
-func parse(fileName string) ([]Pos, int) {
+func parse(fileName string) ([]Pos, int, int) {
 	lines := utils.ReadFile(fileName)
 
 	regex := regexp.MustCompile(`\d+`)
@@ -76,7 +76,7 @@ func parse(fileName string) ([]Pos, int) {
 		size = int(math.Max(float64(col), float64(size)))
 	}
 
-	return fall, size + 1
+	return fall, size + 1, len(lines)
 }
 
 func neighbors(reindeer Reindeer, maze Maze, distances DistanceMaze) []Reindeer {
@@ -188,13 +188,40 @@ func findReindeer(maze Maze) Reindeer {
 }
 
 func main() {
-	fall, size := parse("input")
+	fall, size, numberOfBytes := parse("input")
 
-	maze := initMaze(size, fall, 1024)
+	start := 1024
+	end := numberOfBytes
+
+	found := -1
+
+	for {
+		middle := (start + end) / 2
+
+		maze := initMaze(size, fall, middle)
+		if walk(maze) == -1 {
+			end = middle
+		} else {
+			start = middle
+		}
+
+		if math.Abs(float64(end-start)) <= 1 {
+			maze = initMaze(size, fall, start)
+			if walk(maze) == -1 {
+				found = start
+				break
+			}
+
+			maze = initMaze(size, fall, end)
+			if walk(maze) == -1 {
+				found = end
+			}
+
+			break
+		}
+	}
 
 	// printMaze(maze)
 
-	total := walk(maze)
-
-	fmt.Println(strconv.FormatFloat(float64(total), 'f', -1, 64))
+	fmt.Println(strconv.FormatFloat(float64(found), 'f', -1, 64))
 }
