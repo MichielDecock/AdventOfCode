@@ -1,0 +1,30 @@
+set(CORE_HEADERS
+    include/boat_race.h
+    include/camel.h
+    include/cubes_game.h
+    include/cosmic.h
+    include/desert.h
+    include/gondola_gear.h
+    include/loop.h
+    include/gondola_gear.h
+    include/oasis.h
+    include/scratchcard.h
+    include/seeds.h
+    include/trebuchet_calibration.h
+    include/utils.h
+)
+
+set(CORE_SOURCES
+    boat_race.cpp
+    camel.cpp
+    cubes_game.cpp
+    cosmic.cpp
+    desert.cpp
+    gondola_gear.cpp
+    loop.cpp
+    oasis.cpp
+    scratchcard.cpp
+    seeds.cpp
+    trebuchet_calibration.cpp
+    utils.cpp
+)
