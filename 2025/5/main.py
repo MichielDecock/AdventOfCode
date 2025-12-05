@@ -5,25 +5,41 @@ if __name__ == "__main__":
 
     fresh = []
 
-    idMode = False
-
     with open("input") as file:
         for line in (lines:= [l.strip() for l in file.readlines()]):
 
             if line == '':
-                idMode = True
+                break
+
+            r = [int(l) for l in  line.split('-')]
+
+            if len(fresh) == 0:
+                fresh.append(r)
                 continue
 
-            if not idMode:
-                fresh.append([int(l) for l in  line.split('-')])
-                continue
+            for prev in fresh:
+                if prev[0] == -1:
+                    continue
 
-            id = int(line)
-            
-            for r in fresh:
-                if r[0] <= id and id <= r[1]:
-                    sum +=1
+                if r[0] >= prev[0] and r[0] <= prev[1]:
+                    r[0] = prev[1] + 1
+                elif r[1] >= prev[0] and r[1] <= prev[1]:
+                    r[1] = prev[0] - 1
+
+                if r[0] > r[1]:
                     break
+
+                if r[0] < prev[0] and r[1] > prev[1]:
+                    prev[0] = -1
+
+            if r[0] <= r[1]:
+                fresh.append(r)
+
+        for item in fresh:
+            if item[0] == -1:
+                continue
+
+            sum += item[1] - item[0] + 1
             
 
     print(sum)
