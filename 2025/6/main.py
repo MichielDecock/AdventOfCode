@@ -9,15 +9,32 @@ if __name__ == "__main__":
 
     input = []
 
-    with open("test") as file:
-        for line in (lines:= [l.strip() for l in file.readlines()]):
-            input.append(line.split())
+    with open("input") as file:
+        for line in (lines := [l for l in file.readlines()]):
+            input.append([c for c in line])
 
-        input = list(map(list, zip(*input)))
-        for line in input:
-            if line[-1] == '*':
-                sum += reduce(mul, [int(l) for l in line[:-1]])
-            if line[-1] == '+':
-                sum += reduce(add, [int(l) for l in line[:-1]])
+        operator = ''
+        operands = []
+        for line in (input := list(map(list, zip(*input)))):
+            s = ''.join(line).strip()
+
+            if s == '':
+                if operator == '*':
+                    sum += reduce(mul, operands)
+                elif operator == '+':
+                    sum += reduce(add, operands)
+                continue
+
+            if s.endswith(('*','+')):
+                operator = s[-1]
+                operands = [int(s[:-1])]
+                continue
+
+            operands.append(int(s))
+
+        if operator == '*':
+            sum += reduce(mul, operands)
+        elif operator == '+':
+            sum += reduce(add, operands)
 
     print(sum)
