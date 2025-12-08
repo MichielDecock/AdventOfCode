@@ -2,7 +2,7 @@
 
 import math
 from functools import reduce
-from operator import mul
+from operator import add
 
 class Neighbor:
     def __init__(self, distance, index1, index2, h):
@@ -65,43 +65,29 @@ def makeCircuit(circuits, neighbor):
 
     if c1 is None and c2 is None:
         circuits.append({neighbor.index1, neighbor.index2})
-        return
 
-    if c1 is not None and c2 is None:
+    elif c1 is not None and c2 is None:
         c1.add(neighbor.index2)
-        return
 
-    if c2 is not None and c1 is None:
+    elif c2 is not None and c1 is None:
         c2.add(neighbor.index1)
-        return
 
-    if c1 is not c2:
+    elif c1 is not c2:
         c1 |= c2
         circuits.remove(c2)
 
+    return [neighbor.index1, neighbor.index2]
+
 if __name__ == "__main__":
-    iterations = 10
-    file = "test"
-
-    real = True
-    if real:
-        iterations = 1000
-        file = "input"
-
-    neighbors = []
-
-    nodes = getNodes(file)
+    nodes = getNodes("input")
     neighbors = getNeighbors(nodes)
 
-    with open(f"out-{file}", "w") as file:
-        for n in neighbors:
-            file.write(str(n) + '\n')
-
     circuits = []
+    last = []
 
-    for i in range(iterations):
-        makeCircuit(circuits, neighbors.pop(0))
+    pts = 0
+    while pts < len(nodes):
+        last = makeCircuit(circuits, neighbors.pop(0))
+        pts = reduce(add, [len(c) for c in circuits])
 
-    circuits.sort(key = len, reverse=True)
-
-    print("End result is", reduce(mul, [len(c) for c in circuits[:3]]))
+    print("End result is", nodes[last[0]].x * nodes[last[1]].x)
