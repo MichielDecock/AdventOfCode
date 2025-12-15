@@ -4,8 +4,9 @@ def parse(file):
     
 def check(sequence):
     s = 0
+    l = len(sequence)
     for index, digit in enumerate(sequence):
-        nxt = sequence[(index + 1) % len(sequence)]
+        nxt = sequence[(index + l // 2) % l]
         if digit == nxt:
             s += int(digit)
     return s
