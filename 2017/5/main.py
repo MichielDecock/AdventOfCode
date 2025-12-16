@@ -11,7 +11,7 @@ def escape(jumps):
 
     while front <= pos <= back:
         jump = jumps[pos]
-        jumps[pos] += 1
+        jumps[pos] += (1 if jump < 3 else -1)
         pos += jump
         count += 1
     
