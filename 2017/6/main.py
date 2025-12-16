@@ -15,8 +15,8 @@ def reallocate(banks):
         for i in range(blocks):
             banks[(index + 1 + i) % len(banks)] += 1
 
+    print(banks)
     return len(history)
 
 if __name__ == '__main__':
-    res = reallocate(parse('input'))
-    print(res)
+    print(reallocate([10, 9, 8, 7, 6, 5, 4, 3, 1, 1, 0, 15, 14, 13, 11, 12]))
