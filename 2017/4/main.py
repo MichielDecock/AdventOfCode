@@ -1,6 +1,6 @@
 def parse(file):
     with open(file) as f:
-        return [l.strip().split(' ') for l in f.readlines()]
+        return [[''.join(sorted(word)) for word in l.strip().split(' ')] for l in f.readlines()]
     
 def check(words):
     return len(words) == len(set(words))
