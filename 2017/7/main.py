@@ -21,7 +21,43 @@ def findRoot(map):
         if not stop:
             return parent
 
+def totalWeight(item, map):
+    weight, children = map[item]
+    return weight + sum([totalWeight(child, map) for child in children])
+
+def imbalancedItem(map):
+    imbalancedItem = None
+    toVisit = [findRoot(map)]
+
+    while toVisit:
+        item = toVisit.pop(0)
+        weight, children = map[item]
+        if not children:
+            continue
+
+        weights = [totalWeight(child, map) for child in children]
+        if len(set(weights)) < 2:
+            continue
+        for child in children:
+            toVisit.append(child)
+        imbalancedItem = item
+    
+    return imbalancedItem
+
 if __name__ == '__main__':
     map = parse('input')
-    res = findRoot(map)
-    print(res)
+    parent = imbalancedItem(map)
+    _, children = map[parent]
+
+    weights = [totalWeight(child, map) for child in children]
+    outlier = [w for w in weights if weights.count(w) == 1][0]
+    delta = max(weights) - min(weights)
+    item = children[weights.index(outlier)]
+    weight, _ = map[item]
+
+    if outlier == max(weights):
+        print(weight - delta)
+    else:
+        print(weight + delta)
+
+
