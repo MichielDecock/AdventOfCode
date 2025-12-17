@@ -47,15 +47,19 @@ def initRegisters(instructions):
     
     return registers
 
-def apply(instruction, registers):
+def apply(instruction, registers, space):
     operation, condition = instruction
     if check(condition, registers):
         execute(operation, registers)
+        space = max(space, registers[max(registers, key=lambda k: registers[k])])
+    
+    return space
 
 if __name__ == '__main__':
     instructions = parse('input')
     registers = initRegisters(instructions)
+    space = 0
     for instruction in instructions:
-        apply(instruction, registers)
+        space = apply(instruction, registers, space)
     
-    print(registers[max(registers, key=lambda k: registers[k])])
+    print(space)
