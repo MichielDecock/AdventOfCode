@@ -2,17 +2,17 @@ import os
 from dataclasses import dataclass
 
 _TREE = '#'
-_INCREASE_ROW = 1
-_INCREASE_COL = 3
 
 @dataclass
 class Position:
     row: int
     col: int
 
-    def slide(self, maxCols):
-        self.row += _INCREASE_ROW
-        self.col =  (self.col + _INCREASE_COL) % maxCols
+    def slide(self, maxCols, slope):
+        self.row += slope.row
+        self.col =  (self.col + slope.col) % maxCols
+
+_SLOPES = [Position(1,1), Position(1,3), Position(1,5), Position(1,7), Position(2,1), ]
 
 def parse(filename: str):
     lines = []
@@ -30,10 +30,10 @@ def parse(filename: str):
 
     return [lines, Position(maxRows, maxCols)]
 
-def hits(pos, trees, limit):
+def hits(pos, trees, limit, slope):
     total = 0
     while pos.row < limit.row:
-        pos.slide(limit.col)
+        pos.slide(limit.col, slope)
         if pos in trees:
             total += 1
 
@@ -42,5 +42,8 @@ def hits(pos, trees, limit):
 
 if __name__ == "__main__":
     [trees, limit] = parse('input')
-    print(hits(Position(0,0), trees, limit))
+    total = 1
+    for slope in _SLOPES:
+        total *= hits(Position(0,0), trees, limit, slope)
+    print(total)
 
