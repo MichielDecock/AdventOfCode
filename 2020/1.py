@@ -10,18 +10,22 @@ def getNumbers(filename: str) -> list[int]:
             lines.append(int(line))
     return lines
 
-def findPair(numbers: list[int]) -> list[int] | None:
-    for x in numbers:
-        for y in numbers:
-            if x == y:
+def findCombination(numbers: list[int]) -> list[int] | None:
+    for idx, x in enumerate(numbers):
+        for idy, y in enumerate(numbers):
+            if idx == idy:
                 continue
 
-            if x + y == _TARGET:
-                return [x, y]
-    return []
+            for idz, z in enumerate(numbers):
+                if idx == idz or idy == idz:
+                    continue
+
+                if x + y + z == _TARGET:
+                    return [x, y, z]
+    return None
 
 
 if __name__ == "__main__":
     numbers = getNumbers('input')
-    if pair := findPair(numbers):
-        print(pair[0] * pair[1])
+    if combination := findCombination(numbers):
+        print(combination[0] * combination[1] * combination[2])
