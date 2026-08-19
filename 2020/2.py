@@ -5,8 +5,8 @@ from dataclasses import dataclass
 class Data:
     password: str
     character: str
-    minValue: int
-    maxValue: int
+    pos1: int
+    pos2: int
 
 def getInput(filename: str):
     lines = []
@@ -15,14 +15,14 @@ def getInput(filename: str):
         for line in file:
             [l1, password] = [l.strip() for l in line.split(':')]
             [minmax, char ] =[s.strip() for s in l1.split(' ')]
-            [minValue, maxValue] = [int(el) for el in minmax.split('-')]
-            lines.append(Data(password, char, minValue, maxValue))
+            [pos1, pos2] = [int(el) for el in minmax.split('-')]
+            lines.append(Data(password, char, pos1, pos2))
 
     return lines
 
 def isValid(data) -> bool:
-    count = data.password.count(data.character)
-    return data.minValue <= count and count <= data.maxValue
+    count = sum(1 for el in [data.password[data.pos1 - 1], data.password[data.pos2 - 1]] if el == data.character)
+    return count == 1
 
 
 if __name__ == "__main__":
