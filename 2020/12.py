@@ -1,6 +1,7 @@
 import os
 from dataclasses import dataclass
 from enum import Enum
+import math
 
 class Dir(Enum):
     EAST = 0
@@ -21,6 +22,11 @@ class Boat:
     y: int = 0
     dir: Dir = Dir.EAST
 
+@dataclass
+class WayPoint:
+    x: int = 10
+    y: int = 1
+
 
 def parse(filename):
     lines = []
@@ -30,36 +36,42 @@ def parse(filename):
             lines.append((line[0], int(line[1:])))
     return lines
 
-def move(dir, value, boat):
+def move(dir, value, obj):
     if dir == Dir.EAST:
-        boat.x += value
+        obj.x += value
     elif dir == Dir.SOUTH:
-        boat.y -= value
+        obj.y -= value
     elif dir == Dir.WEST:
-        boat.x -= value
+        obj.x -= value
     elif dir == Dir.NORTH:
-        boat.y += value
+        obj.y += value
 
-def sail(instruction, boat):
+def rotate(instruction, boat, wayPoint):
+    i, value = instruction
+    d = [wayPoint.x, wayPoint.y]
+    angle = value * math.pi / 180 * (1 if i == 'L' else -1)
+    rot = [[math.cos(angle), -math.sin(angle)], [math.sin(angle), math.cos(angle)]]
+    wayPoint.x = round(sum(rot[0][i] * d[i] for i in range(2)))
+    wayPoint.y = round(sum(rot[1][i] * d[i] for i in range(2)))
+        
+def sail(instruction, boat, wayPoint):
     i, value = instruction
     
-    if i == 'L':
-        boat.dir = Dir((boat.dir.value - value // 90) % 4)
-    elif i == 'R':
-        boat.dir = Dir((boat.dir.value + value // 90) % 4)
+    if i == 'L' or i == 'R':
+        rotate(instruction, boat, wayPoint)
     elif i == 'F':
-        move(boat.dir, value, boat)
+        boat.x += value * wayPoint.x
+        boat.y += value * wayPoint.y
     else:
-        move(_DIR_MAP[i], value, boat)
-
-    return boat
+        move(_DIR_MAP[i], value, wayPoint)
 
 if __name__ == "__main__":
     instructions = parse('input')
 
     boat = Boat()
+    wayPoint = WayPoint()
     for i in instructions:
-        boat = sail(i, boat)
+        sail(i, boat, wayPoint)
 
-    print(abs(boat.x) + abs(boat.y))
+    print((abs(boat.x)) + int(abs(boat.y)))
     
