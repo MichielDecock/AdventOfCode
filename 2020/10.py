@@ -11,29 +11,22 @@ def parse(filename):
 
     return lines
 
-def addToDistro(value, distro):
-    if value in distro:
-        distro[value] += 1
-    else:
-        distro[value] = 1
-
-def makeDistro(voltages):
+def pathCounts(voltages):
     voltages.append(_START_VOLTAGE)
+    voltages.append(max(voltages) + _MAX_DIFF)
     voltages.sort()
-    distro = dict()
-    for i in range(len(voltages) - 1):
-        diff = voltages[i + 1] - voltages[i]
-        if (diff > _MAX_DIFF):
-            print("error")
 
-        addToDistro(diff, distro)
-
-    addToDistro(3, distro)
-        
-    return distro
+    n = len(voltages)
+    counts = [0] * n
+    counts[0] = 1
+    for j in range(1, n):
+        for i in range(j):
+            if voltages[j] - voltages[i] <= _MAX_DIFF:
+                counts[j] += counts[i]
+    return counts[-1]
 
 
 if __name__ == "__main__":
     lines = parse('input')
-    distro = makeDistro(lines)
-    print(distro[1] * distro[3])
+    counts = pathCounts(lines)
+    print(counts)
