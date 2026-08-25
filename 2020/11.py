@@ -22,19 +22,25 @@ def parse(filename):
                     continue
                 seats.append(Seat(row, col, []))
     return (seats, rows, cols)
+
+def isDiagonal(refRow, refCol, row, col):
+    return abs(refRow - row) == abs(refCol - col)
+
+def addNeighbor(neighbors, candidates):
+    if len(candidates) > 0:
+        neighbors.append(candidates[0])
     
 def getNeighbors(seats, rows, cols):
     for seat in seats:
         neighbors = []
-        for nRow in range(max(0, seat.row - 1), min(rows, seat.row + 2)):
-            for nCol in range(max(0, seat.col - 1), min(cols, seat.col + 2)):
-                if nRow == seat.row and nCol == seat.col:
-                    continue
-
-                match = next((seat for seat in seats if seat.row == nRow and seat.col == nCol), None)
-                if match is not None:
-                    neighbors.append(match)
-
+        addNeighbor(neighbors, sorted([s for s in seats if seat.row > s.row and seat.col == s.col], key=lambda x: x.row, reverse= True)) #top
+        addNeighbor(neighbors, sorted([s for s in seats if seat.row < s.row and seat.col == s.col], key=lambda x: x.row)) #bottom
+        addNeighbor(neighbors, sorted([s for s in seats if seat.row == s.row and seat.col > s.col], key=lambda x: x.col, reverse= True)) #left
+        addNeighbor(neighbors, sorted([s for s in seats if seat.row == s.row and seat.col < s.col], key=lambda x: x.col)) #right
+        addNeighbor(neighbors, sorted([s for s in seats if isDiagonal(seat.row, seat.col, s.row, s.col) and s.row < seat.row and s.col < seat.col], key=lambda x: x.row, reverse=True)) #topLeft
+        addNeighbor(neighbors, sorted([s for s in seats if isDiagonal(seat.row, seat.col, s.row, s.col) and s.row > seat.row and s.col < seat.col], key=lambda x: x.row)) #bottomLeft
+        addNeighbor(neighbors, sorted([s for s in seats if isDiagonal(seat.row, seat.col, s.row, s.col) and s.row < seat.row and s.col > seat.col], key=lambda x: x.row, reverse= True)) #topRight
+        addNeighbor(neighbors, sorted([s for s in seats if isDiagonal(seat.row, seat.col, s.row, s.col) and s.row > seat.row and s.col > seat.col], key=lambda x: x.row)) #bottomRight
         seat.neighbors = neighbors
 
 def move(seats):
@@ -43,7 +49,7 @@ def move(seats):
     for idx, seat in enumerate(seats):
         if not seat.occ and all(not n.occ for n in seat.neighbors):
             mods.append(idx)
-        elif seat.occ and sum(1 for n in seat.neighbors if n.occ) >= 4:
+        elif seat.occ and sum(1 for n in seat.neighbors if n.occ) >= 5:
             mods.append(idx)
 
     for m in mods:
