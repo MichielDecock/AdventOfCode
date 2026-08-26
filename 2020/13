@@ -6,12 +6,20 @@ def parse(filename):
     fullFilename = os.path.join(os.path.dirname(__file__), filename)
     with open(fullFilename) as file:
         lines = [line.strip('\n') for line in file]
-        return (int(lines[0]), [int(x) for x in lines[1].split(',') if x != 'x'])
+        return [(int(x), idx) for idx,x in enumerate(lines[1].split(',')) if x != 'x']
     return []
 
+def findTimestamp(ids):
+    t = 0
+    delta = 1
+    for id, offset in ids:
+        while (t + offset) % id != 0:
+            t += delta
+        delta = math.lcm(delta, id)
+
+    return t
 
 if __name__ == "__main__":
-    eta, ids = parse('input')
+    ids = parse('input')
 
-    time, id = sorted([(math.ceil(eta / x) * x, x) for x in ids], key=lambda t: t[0])[0]
-    print((time - eta) * id)
+    print(findTimestamp(ids))
