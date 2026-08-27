@@ -1,16 +1,28 @@
 import os
+from itertools import product
 
+def getFloatingMasks(bits):
+        masks = []
+
+        for comb in product([0,1], repeat=len(bits)):
+            mask = 0
+            for bit, pos in zip(comb, bits):
+                if bit == 1:
+                    mask += 2**pos
+            masks.append(mask)
+
+        return masks
 
 def parse(filename):
     out = []
-    masks: tuple[int, int] | None = None
+    masks = []
     mem = []
 
     def flush():
         nonlocal masks, mem
-        if masks is not None:
+        if len(masks) > 0:
             out.append((masks, mem))
-            masks = None
+            masks = []
             mem = []
 
     fullFilename = os.path.join(os.path.dirname(__file__), filename)
@@ -20,7 +32,10 @@ def parse(filename):
 
             if t == 'mask':
                 flush()
-                masks = (int(v.strip().replace('X', '0'), 2), int(v.strip().replace('X', '1'), 2))
+                vStrip = v.strip()
+                idx = sorted([len(vStrip) - (i + 1) for i, c in enumerate(vStrip) if c == 'X'])
+                masks.append(int(vStrip.replace('X', '0'), 2))
+                masks.extend(idx)
                 continue
 
             address = int(t.split('[')[1].strip().split(']')[0].strip())
@@ -30,14 +45,29 @@ def parse(filename):
         flush()
 
     return out
-            
 
+def copyBits(dest, src, bits):
+    for pos in bits:
+        mask = 1 << pos
+        dest &= ~mask
+        bit = (src & mask)
+        dest |= bit
+    return dest
 
 if __name__ == "__main__":
     mem = {}
     instructions = parse('input')
-    for (mask1, mask2), inst in instructions:
+
+    for m, inst in instructions:
+        mask = m[0]
+        bits = m[1:]
+
+        fMasks = getFloatingMasks(bits)
+
         for address, value in inst:
-            mem[address] = (value |  mask1) & mask2
+            address |= mask
+            for fMask in fMasks:
+                newAddress = copyBits(address, fMask, bits)
+                mem[newAddress] = value
 
     print(sum(mem.values()))
