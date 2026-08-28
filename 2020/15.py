@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass
 
-_TARGET = 2020
+_TARGET = 30000000
 
 @dataclass
 class Number():
